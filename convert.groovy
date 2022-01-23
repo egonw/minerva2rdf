@@ -69,6 +69,26 @@ for (species : sbml.model.listOfSpecies.species) {
 for (reaction : sbml.model.listOfReactions.reaction) {
   interactionURL = pwURL + "/interaction/" + reaction.@id
   println "<$interactionURL>\n        rdf:type wp:DirectedInteraction , wp:Interaction ;"
-  println "        dcterms:isPartOf <$pwURL> ."
+  sources = ""
+  targets = ""
+  participants = ""
+  for (reactant : reaction.listOfReactants.speciesReference) {
+    if (participants.length() > 0) participants += ", "
+    if (sources.length() > 0) sources += ", "
+    speciesURL = pwURL + "/species/" + reactant.@species
+    participants += "<$speciesURL>"
+    sources += "<$speciesURL>"
+  }
+  for (product : reaction.listOfProducts.speciesReference) {
+    if (participants.length() > 0) participants += ", "
+    if (targets.length() > 0) targets += ", "
+    speciesURL = pwURL + "/species/" + product.@species
+    participants += "<$speciesURL>"
+    targets += "<$speciesURL>"
+  }
+  if (participants.length() > 0) println "        wp:participants     $participants ;"
+  if (sources.length() > 0)    println "        wp:source           $sources ;"
+  if (targets.length() > 0)    println "        wp:target           $targets ;"
+  println "        dcterms:isPartOf    <$pwURL> ."
   println ""
 }
