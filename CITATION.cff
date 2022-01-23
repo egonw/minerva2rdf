@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the WikiPathways RDF paper, as the RDF output is described in that paper."
+authors:
+  - family-names: Willighagen
+    given-names: Egon
+    orcid: https://orcid.org/0000-0001-7542-0286
+title: Minerva 2 WPRDF
+version: 0.0.1-SNAPSHOT
+url: "https://github.com/egonw/minerva2rdf"
+preferred-citation:
+  type: article
+  title: "Using the Semantic Web for Rapid Integration of WikiPathways with Other Biological Online Data Resources"
+  authors:
+  - family-names: Waagmeester
+    given-names: Andra
+  - family-names: Summer-Kutmon
+    given-names: Martina
+  - family-names: Riutta
+    given-names: Anders
+  - family-names: Miller
+    given-names: Ryan
+  - family-names: Willighagen
+    given-names: Egon
+  - family-names: Evelo
+    given-names: Chris T
+  - family-names: Pico
+    given-names: Alexander R.
+  doi: 10.1371/JOURNAL.PCBI.1004989
+  year: 2016
+  month: 6
+  day: 23
+  journal: PLOS Computational Biology
+  volume: 12
+  issue: 6
+  url: https://doi.org/10.1371/JOURNAL.PCBI.1004989
