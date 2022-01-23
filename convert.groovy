@@ -13,6 +13,8 @@ sbml = new XmlSlurper().parseText(text)
 
 println "@prefix dc:      <http://purl.org/dc/elements/1.1/> ."
 println "@prefix dcterms: <http://purl.org/dc/terms/> ."
+println "@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ."
+println "@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> ."
 println "@prefix skos:    <http://www.w3.org/2004/02/skos/core#> ."
 println "@prefix wp:      <http://vocabularies.wikipathways.org/wp#> ."
 println ""
