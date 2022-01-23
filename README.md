@@ -12,3 +12,11 @@ Example conversion:
 ```shell
 groovy convert.groovy data/submaps/Apoptosis\ pathway.xml
 ```
+
+The resulting Turtle can be validated with:
+
+```shell
+cat foo.ttl | rapper -i turtle -t -q - . > /dev/null
+```
+
+(Install rapper with `apt install raptor2-utils` on Debian/Ubuntu.)
