@@ -3,7 +3,13 @@
 Get data at https://covid19map.elixir-luxembourg.org/minerva/ under Info, 'source file'
 as a zip file.
 
-Unzip the content in a newly created `data` folder.
+Unzip the content in a newly created `data` folder. After that, replace spaces in the filenames
+into underscores:
+
+```shell
+cd data/submaps
+rename 's/\s/_/g' -- *.xml
+```
 
 ## Converting Minerva SMBL files
 
