@@ -13,6 +13,14 @@ rename 's/\s/_/g' -- *.xml
 
 ## Converting Minerva SMBL files
 
+Easiest is just to use the `Makefile`:
+
+```shell
+make all.ttl
+```
+
+### Step by step
+
 Example conversion:
 
 ```shell
