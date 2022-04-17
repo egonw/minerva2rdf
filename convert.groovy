@@ -50,7 +50,7 @@ for (species : sbml.model.listOfSpecies.species) {
   mainExtDone = false
   for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy') {
     extID = annotation.'rdf:Bag'.'rdf:li'.'@rdf:resource'
-    if (("" + extID).startsWith("urn:miriam:ensembl:") && !ensemblDone) {
+    if (("" + extID).startsWith("urn:miriam:ensembl:") && !ensemblDone) { // only one Ensembl ID
       ensemblDone = true
       ensID = ("" + extID).substring(19)
       if (!mainExtDone) {
@@ -59,7 +59,7 @@ for (species : sbml.model.listOfSpecies.species) {
         println "        dcterms:identifier  \"${ensID}\" ;"
       }
       println "        wp:bdbEnsembl       <https://identifiers.org/ensembl/${ensID}> ;"
-    } else if (("" + extID).startsWith("urn:miriam:ncbigene:") && !ncbiDone) {
+    } else if (("" + extID).startsWith("urn:miriam:ncbigene:") && !ncbiDone) { // only one NCBI Gene ID
       ncbiDone = true
       ncbiID = ("" + extID).substring(20)
       if (!mainExtDone) {
@@ -68,7 +68,7 @@ for (species : sbml.model.listOfSpecies.species) {
         println "        dcterms:identifier  \"${ncbiID}\" ;"
       }
       println "        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/${ncbiID}> ;"
-    } else if (("" + extID).startsWith("urn:miriam:hgnc.symbol:") && !hgncDone) {
+    } else if (("" + extID).startsWith("urn:miriam:hgnc.symbol:") && !hgncDone) { // only one HGNC ID
       hgncDone = true
       hgncID = ("" + extID).substring(23)
       println "        rdfs:label          \"${hgncID}\" ;"
