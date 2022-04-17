@@ -40,6 +40,10 @@ for (species : sbml.model.listOfSpecies.species) {
     if (type == "PROTEIN") specificType += ", wp:Protein"
   }
   println "<$speciesURL>\n        rdf:type wp:DataNode${specificType} ;"
+  if (species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:name') {
+    name = species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:name'
+    if (name != "") println "        rdfs:label \"${name}\" ;"
+  }
   ncbiDone = false
   ensemblDone = false
   hgncDone = false
