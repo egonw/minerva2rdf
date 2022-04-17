@@ -23,6 +23,7 @@ sbml = new XmlSlurper().parseText(text)
   .declareNamespace(celldesigner: 'http://www.sbml.org/2001/ns/celldesigner')
   .declareNamespace(rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
   .declareNamespace(bqbiol: 'http://biomodels.net/biology-qualifiers/')
+  .declareNamespace(bqmodel: 'http://biomodels.net/model-qualifiers/')
 
 println "@prefix dc:      <http://purl.org/dc/elements/1.1/> ."
 println "@prefix dcterms: <http://purl.org/dc/terms/> ."
@@ -189,6 +190,27 @@ for (species : sbml.model.listOfSpecies.species) {
       }
     }
   }
+  println "        # references"
+  references = new ArrayList<>()
+  if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:isDescribedBy'.size() > 0)
+      for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:isDescribedBy')
+        references.add(annotation)
+  if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'.size() > 0)
+      for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy')
+        references.add(annotation)
+  if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:is'.size() > 0)
+      for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:is')
+        references.add(annotation)
+  for (reference : references) {
+    extID = reference.'rdf:Bag'.'rdf:li'.'@rdf:resource'
+    if (("" + extID).startsWith("urn:miriam:pubmed:")) { // all PubMed IDs
+      pmdID = ("" + extID).substring(18)
+      println "        dcterms:references <https://identifiers.org/pubmed/${pmdID}> ;"
+    } else if (("" + extID).startsWith("urn:miriam:doi:")) { // all DOIs
+      doi = ("" + extID).substring(15).replace("%2F","/")
+      println "        dcterms:references <https://doi.org/${doi}> ;"
+    }
+  }
   println "        dcterms:isPartOf    <$pwURL> ."
   println ""
 }
@@ -216,6 +238,27 @@ for (reaction : sbml.model.listOfReactions.reaction) {
   if (participants.length() > 0) println "        wp:participants     $participants ;"
   if (sources.length() > 0)    println "        wp:source           $sources ;"
   if (targets.length() > 0)    println "        wp:target           $targets ;"
+  println "        # references"
+  references = new ArrayList<>()
+  if (reaction.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:isDescribedBy'.size() > 0)
+      for (annotation : reaction.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:isDescribedBy')
+        references.add(annotation)
+  if (reaction.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'.size() > 0)
+      for (annotation : reaction.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy')
+        references.add(annotation)
+  if (reaction.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:is'.size() > 0)
+      for (annotation : reaction.annotation.'rdf:RDF'.'rdf:Description'.'bqmodel:is')
+        references.add(annotation)
+  for (reference : references) {
+    extID = reference.'rdf:Bag'.'rdf:li'.'@rdf:resource'
+    if (("" + extID).startsWith("urn:miriam:pubmed:")) { // all PubMed IDs
+      pmdID = ("" + extID).substring(18)
+      println "        dcterms:references <https://identifiers.org/pubmed/${pmdID}> ;"
+    } else if (("" + extID).startsWith("urn:miriam:doi:")) { // all DOIs
+      doi = ("" + extID).substring(15).replace("%2F","/")
+      println "        dcterms:references <https://doi.org/${doi}> ;"
+    }
+  }
   println "        dcterms:isPartOf    <$pwURL> ."
   println ""
 }
