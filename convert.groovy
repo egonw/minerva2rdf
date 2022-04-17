@@ -1,9 +1,15 @@
 
 @Grab(group='jakarta.activation', module='jakarta.activation-api', version='1.2.2')
 @Grab(group='io.github.egonw.bacting', module='managers-bridgedb', version='0.0.34')
+@Grab(group='io.github.egonw.bacting', module='managers-ui', version='0.0.34')
 
 workspaceRoot = ".."
+bioclipse = new net.bioclipse.managers.BioclipseManager(workspaceRoot);
 bridgedb = new net.bioclipse.managers.BridgedbManager(workspaceRoot);
+mapper = new org.bridgedb.IDMapperStack()
+mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/Hs_Derby_Ensembl_104.bridge")))
+mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/complexes_20200510.bridge")))
+mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/humancorona-2021-11-27.bridge")))
 
 import groovy.xml.XmlSlurper
 
@@ -53,6 +59,7 @@ for (species : sbml.model.listOfSpecies.species) {
   ensemblDone = false
   hgncDone = false
   mainExtDone = false
+  extIDref = null
   for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy') {
     extID = annotation.'rdf:Bag'.'rdf:li'.'@rdf:resource'
     if (("" + extID).startsWith("urn:miriam:ensembl:") && !ensemblDone) { // only one Ensembl ID
@@ -60,6 +67,7 @@ for (species : sbml.model.listOfSpecies.species) {
       ensID = ("" + extID).substring(19)
       if (!mainExtDone) {
         mainExtDone = true
+        extIDref = bridgedb.xref(ensID, "En")
         println "        dc:source           \"Ensembl\" ;"
         println "        dcterms:identifier  \"${ensID}\" ;"
       }
@@ -69,6 +77,7 @@ for (species : sbml.model.listOfSpecies.species) {
       ncbiID = ("" + extID).substring(20)
       if (!mainExtDone) {
         mainExtDone = true
+        extIDref = bridgedb.xref(ncbiID, "L")
         println "        dc:source           \"Entrez Gene\" ;"
         println "        dcterms:identifier  \"${ncbiID}\" ;"
       }
@@ -76,7 +85,31 @@ for (species : sbml.model.listOfSpecies.species) {
     } else if (("" + extID).startsWith("urn:miriam:hgnc.symbol:") && !hgncDone) { // only one HGNC ID
       hgncDone = true
       hgncID = ("" + extID).substring(23)
+      println "        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/${hgncID}> ;"
       println "        rdfs:label          \"${hgncID}\" ;"
+    }
+  }
+  if (extIDref != null) {
+    println "        # mapped identifiers, starting from ${extIDref}"
+    if (!ensemblDone) {
+      mappings = bridgedb.map(mapper, extIDref, "En")
+      if (mappings != null && mappings.size() > 0) {
+        mapping = mappings.iterator().next()
+        println "        wp:bdbEnsembl    <https://identifiers.org/ensembl/${mapping.id}> ;"
+      }
+    }
+    if (!hgncDone) {
+      mappings = bridgedb.map(mapper, extIDref, "H")
+      if (mappings != null && mappings.size() > 0) {
+        mapping = mappings.iterator().next()
+        println "        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/${mapping.id}> ;"
+      }
+    }
+    {
+      mappings = bridgedb.map(mapper, extIDref, "S")
+      for (mapping : mappings) {
+        println "        wp:bdbUniprot    <https://identifiers.org/uniprot/${mapping.id}> ;"
+      }
     }
   }
   println "        dcterms:isPartOf    <$pwURL> ."

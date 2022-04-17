@@ -1,2 +1,4 @@
 all.tll
 data/
+derby.log
+*.bridge

@@ -11,6 +11,11 @@ cd data/submaps
 rename 's/\s/_/g' -- *.xml
 ```
 
+## Download the BridgeDb mapping file
+
+Download `Hs_Derby_Ensembl_91.bridge` (or similar) and put it in this folder.
+Check the file name in the `convert.groovy`.
+
 ## Converting Minerva SMBL files
 
 Easiest is just to use the `Makefile`:
