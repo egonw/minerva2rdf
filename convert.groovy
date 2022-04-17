@@ -65,10 +65,13 @@ for (species : sbml.model.listOfSpecies.species) {
       species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy'.size() == 0) {
     println "        # No interesting identifiers"
   } else {
+    annotations = new ArrayList<>()
     if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'.size() > 0)
-      annotations = species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'
+      for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy')
+        annotations.add(annotation)
     if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy'.size() > 0)
-      annotations = species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy'
+      for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy')
+        annotations.add(annotation)
     ncbiDone = false
     ensemblDone = false
     hgncDone = false
