@@ -1,4 +1,10 @@
 
+@Grab(group='jakarta.activation', module='jakarta.activation-api', version='1.2.2')
+@Grab(group='io.github.egonw.bacting', module='managers-bridgedb', version='0.0.34')
+
+workspaceRoot = ".."
+bridgedb = new net.bioclipse.managers.BridgedbManager(workspaceRoot);
+
 import groovy.xml.XmlSlurper
 
 input = args[0]
