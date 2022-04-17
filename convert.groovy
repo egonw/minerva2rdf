@@ -51,8 +51,13 @@ for (species : sbml.model.listOfSpecies.species) {
     if (type == "ION") specificType += ", wp:Metabolite"
   }
   println "<$speciesURL>\n        rdf:type wp:DataNode${specificType} ;"
-  if (species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:name') {
+  name = "" + species.@name
+  if (name != "") {
+    name = name.replaceAll("_slash_","/")
+    println "        rdfs:label \"${name}\" ;"
+  } else if (species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:name') {
     name = species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:name'
+    name = name.replace("_slash_","/")
     if (name != "") println "        rdfs:label \"${name}\" ;"
   }
   ncbiDone = false
