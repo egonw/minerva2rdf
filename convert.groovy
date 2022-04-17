@@ -37,7 +37,12 @@ for (species : sbml.model.listOfSpecies.species) {
   if (species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:class') {
     type = species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:class'
     if (type == "COMPLEX") specificType += ", wp:Complex"
+    if (type == "GENE") specificType += ", wp:GeneProduct"
+    if (type == "RNA") specificType += ", wp:Rna"
     if (type == "PROTEIN") specificType += ", wp:Protein"
+    if (type == "SIMPLE_MOLECULE") specificType += ", wp:Metabolite"
+    if (type == "DRUG") specificType += ", wp:Metabolite"
+    if (type == "ION") specificType += ", wp:Metabolite"
   }
   println "<$speciesURL>\n        rdf:type wp:DataNode${specificType} ;"
   if (species.annotation.'celldesigner:extension'.'celldesigner:speciesIdentity'.'celldesigner:name') {
