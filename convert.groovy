@@ -10,6 +10,7 @@ mapper = new org.bridgedb.IDMapperStack()
 mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/Hs_Derby_Ensembl_104.bridge")))
 mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/complexes_20200510.bridge")))
 mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/humancorona-2021-11-27.bridge")))
+mapper.addIDMapper(bridgedb.loadRelationalDatabase(bioclipse.fullPath("/minerva2rdf/metabolites_20210109.bridge")))
 
 import groovy.xml.XmlSlurper
 
@@ -60,60 +61,128 @@ for (species : sbml.model.listOfSpecies.species) {
     name = name.replace("_slash_","/")
     if (name != "") println "        rdfs:label \"${name}\" ;"
   }
-  ncbiDone = false
-  ensemblDone = false
-  hgncDone = false
-  mainExtDone = false
-  extIDref = null
-  for (annotation : species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy') {
-    extID = annotation.'rdf:Bag'.'rdf:li'.'@rdf:resource'
-    if (("" + extID).startsWith("urn:miriam:ensembl:") && !ensemblDone) { // only one Ensembl ID
-      ensemblDone = true
-      ensID = ("" + extID).substring(19)
-      if (!mainExtDone) {
-        mainExtDone = true
-        extIDref = bridgedb.xref(ensID, "En")
-        println "        dc:source           \"Ensembl\" ;"
-        println "        dcterms:identifier  \"${ensID}\" ;"
+  if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'.size() == 0 &&
+      species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy'.size() == 0) {
+    println "        # No interesting identifiers"
+  } else {
+    if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'.size() > 0)
+      annotations = species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isDescribedBy'
+    if (species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy'.size() > 0)
+      annotations = species.annotation.'rdf:RDF'.'rdf:Description'.'bqbiol:isEncodedBy'
+    ncbiDone = false
+    ensemblDone = false
+    hgncDone = false
+    chebiDone = false
+    uniprotDone = false
+    cidDone = false
+    mainExtDone = false
+    extIDref = null
+    for (annotation : annotations) {
+      extID = annotation.'rdf:Bag'.'rdf:li'.'@rdf:resource'
+      if (("" + extID).startsWith("urn:miriam:ensembl:") && !ensemblDone) { // only one Ensembl ID
+        ensemblDone = true
+        ensID = ("" + extID).substring(19)
+        if (!mainExtDone) {
+          mainExtDone = true
+          extIDref = bridgedb.xref(ensID, "En")
+          println "        dc:source           \"Ensembl\" ;"
+          println "        dcterms:identifier  \"${ensID}\" ;"
+        }
+        println "        wp:bdbEnsembl       <https://identifiers.org/ensembl/${ensID}> ;"
+      } else if (("" + extID).startsWith("urn:miriam:ncbigene:") && !ncbiDone) { // only one NCBI Gene ID
+        ncbiDone = true
+        ncbiID = ("" + extID).substring(20)
+        if (!mainExtDone) {
+          mainExtDone = true
+          extIDref = bridgedb.xref(ncbiID, "L")
+          println "        dc:source           \"Entrez Gene\" ;"
+          println "        dcterms:identifier  \"${ncbiID}\" ;"
+        }
+        println "        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/${ncbiID}> ;"
+      } else if (("" + extID).startsWith("urn:miriam:uniprot:") && !uniprotDone) { // only one UniProt ID
+        uniprotDone = true
+        uniprotID = ("" + extID).substring(19)
+        if (!mainExtDone) {
+          mainExtDone = true
+          extIDref = bridgedb.xref(uniprotID, "S")
+          println "        dc:source           \"Uniprot-TrEMBL\" ;"
+          println "        dcterms:identifier  \"${uniprotID}\" ;"
+        }
+        println "        wp:bdbUniprot    <https://identifiers.org/uniprot/${uniprotID}> ;"
+      } else if (("" + extID).startsWith("urn:miriam:hgnc.symbol:") && !hgncDone) { // only one HGNC ID
+        hgncDone = true
+        hgncID = ("" + extID).substring(23)
+        println "        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/${hgncID}> ;"
+        println "        rdfs:label          \"${hgncID}\" ;"
+      } else if (("" + extID).startsWith("urn:miriam:obo.chebi:") && !chebiDone) { // only one ChEBI ID
+        chebiDone = true
+        chebiID = ("" + extID).substring(21).replace("CHEBI%3A","")
+        if (!mainExtDone) {
+          mainExtDone = true
+          extIDref = bridgedb.xref(chebiID, "Ce")
+          println "        dc:source           \"ChEBI\" ;"
+          println "        dcterms:identifier  \"${chebiID}\" ;"
+        }
+        println "        wp:bdbChEBI    <https://identifiers.org/chebi/${chebiID}> ;"
+      } else if (("" + extID).startsWith("urn:miriam:pubchem.compound:") && !cidDone) { // only one PubChem Compound ID
+        cidDone = true
+        cidID = ("" + extID).substring(28)
+        if (!mainExtDone) {
+          mainExtDone = true
+          extIDref = bridgedb.xref(cidID, "Cpc")
+          println "        dc:source           \"PubChem-compound\" ;"
+          println "        dcterms:identifier  \"${cidID}\" ;"
+        }
+        println "        wp:bdbPubChem    <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/${cidID}> ;"
       }
-      println "        wp:bdbEnsembl       <https://identifiers.org/ensembl/${ensID}> ;"
-    } else if (("" + extID).startsWith("urn:miriam:ncbigene:") && !ncbiDone) { // only one NCBI Gene ID
-      ncbiDone = true
-      ncbiID = ("" + extID).substring(20)
-      if (!mainExtDone) {
-        mainExtDone = true
-        extIDref = bridgedb.xref(ncbiID, "L")
-        println "        dc:source           \"Entrez Gene\" ;"
-        println "        dcterms:identifier  \"${ncbiID}\" ;"
-      }
-      println "        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/${ncbiID}> ;"
-    } else if (("" + extID).startsWith("urn:miriam:hgnc.symbol:") && !hgncDone) { // only one HGNC ID
-      hgncDone = true
-      hgncID = ("" + extID).substring(23)
-      println "        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/${hgncID}> ;"
-      println "        rdfs:label          \"${hgncID}\" ;"
     }
-  }
-  if (extIDref != null) {
-    println "        # mapped identifiers, starting from ${extIDref}"
-    if (!ensemblDone) {
-      mappings = bridgedb.map(mapper, extIDref, "En")
-      if (mappings != null && mappings.size() > 0) {
-        mapping = mappings.iterator().next()
-        println "        wp:bdbEnsembl    <https://identifiers.org/ensembl/${mapping.id}> ;"
+    if (extIDref != null) {
+      println "        # mapped identifiers, starting from ${extIDref}"
+      if (!ensemblDone) {
+        mappings = bridgedb.map(mapper, extIDref, "En")
+        if (mappings != null && mappings.size() > 0) {
+          mapping = mappings.iterator().next()
+          println "        wp:bdbEnsembl    <https://identifiers.org/ensembl/${mapping.id}> ;"
+        }
       }
-    }
-    if (!hgncDone) {
-      mappings = bridgedb.map(mapper, extIDref, "H")
-      if (mappings != null && mappings.size() > 0) {
-        mapping = mappings.iterator().next()
-        println "        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/${mapping.id}> ;"
+      if (!hgncDone) {
+        mappings = bridgedb.map(mapper, extIDref, "H")
+        if (mappings != null && mappings.size() > 0) {
+          mapping = mappings.iterator().next()
+          println "        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/${mapping.id}> ;"
+        }
       }
-    }
-    {
-      mappings = bridgedb.map(mapper, extIDref, "S")
-      for (mapping : mappings) {
-        println "        wp:bdbUniprot    <https://identifiers.org/uniprot/${mapping.id}> ;"
+      if (!uniprotDone) {
+        mappings = bridgedb.map(mapper, extIDref, "S")
+        for (mapping : mappings) {
+          println "        wp:bdbUniprot    <https://identifiers.org/uniprot/${mapping.id}> ;"
+        }
+      }
+      if (!chebiDone) {
+        mappings = bridgedb.map(mapper, extIDref, "Ce")
+        if (mappings != null && mappings.size() > 0) {
+          mapping = mappings.iterator().next()
+          println "        wp:bdbChEBI    <https://identifiers.org/chebi/${mapping.id}> ;"
+        }
+      }
+      if (!cidDone) {
+        mappings = bridgedb.map(mapper, extIDref, "Cpc")
+        if (mappings != null && mappings.size() > 0) {
+          mapping = mappings.iterator().next()
+          println "        wp:bdbPubChem    <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/${mapping.id}> ;"
+        }
+      }
+      { // always
+        mappings = bridgedb.map(mapper, extIDref, "Ik")
+        for (mapping : mappings) {
+          println "        wp:bdbInChIKey    <https://identifiers.org/inchikey/${mapping.id}> ;"
+        }
+      }
+      { // always
+        mappings = bridgedb.map(mapper, extIDref, "Wd")
+        for (mapping : mappings) {
+          println "        wp:bdbWikidata    <http://www.wikidata.org/entity/${mapping.id}> ;"
+        }
       }
     }
   }
